@@ -1,7 +1,4 @@
-let posX = 0;
-let inc = 1;
 let birdY = 20;
-
 let velocity = 0;
 let gravity = 0.1;
 
@@ -10,14 +7,14 @@ const playerAnimation = [0, 1, 2];
 
 function _update() {
     T += 1;
+    fall();
+    flap();
 }
 
 function _draw() {
     cls(12);
     animateBird();
 
-    fall();
-    flap();
     print("hello world!", 40, 60); 
 }
 
@@ -27,10 +24,16 @@ function animateBird() {
 }
 
 function flap() {
+    if (birdY <= 0) {
+        birdY = 0;
+        velocity = 0;
+    }
+
     if (btnp(2)) {
         velocity = -2;
     }
 }
+
 function fall() {
     velocity += gravity;
     birdY += velocity;

@@ -1,1 +1,1 @@
-# pico-js-demo
+# PICO-JS Demo Project: Flappy Bird
