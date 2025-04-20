@@ -1,25 +1,37 @@
 let birdY = 20;
 let velocity = 0;
 let gravity = 0.1;
+const gap = 48;
+let gameOver = false;
+let gameStarted = false;
 
 let T = 0;
 const playerAnimation = [0, 1, 2];
+
+let pipes = [
+    { x: 108, y: 0, free: true },
+    { x: 108, y: 0, free: true },
+    { x: 108, y: 0, free: true },
+];
 
 function _update() {
     T += 1;
     fall();
     flap();
+    movePipes();
+    checkCollision();
 }
 
 function _draw() {
     cls(12);
     animateBird();
 
-    spr(16, 20, 20);
-    spr(17, 28, 20);
-    spr(33, 20, 28);
-    spr(34, 28, 28);
-    print("hello world!", 40, 60); 
+    spawnPipes();
+    for (let i = 0; i < pipes.length; i++) {
+        drawPipe(pipes[i]);
+    }
+
+    collisionArea();
 }
 
 function animateBird() {
@@ -38,6 +50,41 @@ function flap() {
     }
 }
 
+function collisionArea() {
+    for (let i = 0; i < pipes.length; i++) {
+        if (pipes[i].free) continue;
+
+        const pipeY = pipes[i].y;
+        const pipeX = pipes[i].x;
+
+        rect(pipeX + 2, pipeY - 7, 12, 126, 10);
+        rect(pipeX + 2, 0, 12, pipeY - gap + 8 + 7, 10);
+
+        //if (birdY >= pipeY - 7 && birdY <= pipeY + gap) {
+        //    if (pipeX <= 20 && pipeX + 2 >= 20) {
+        //        return true;
+        //    }
+        //}
+    }
+    return false;
+}
+
+function checkCollision() {
+    for (let i = 0; i < pipes.length; i++) {
+        if (pipes[i].free) continue;
+
+        const pipeY = pipes[i].y;
+        const pipeX = pipes[i].x;
+
+        if (birdY >= pipeY - 7 && birdY <= pipeY + gap) {
+            if (pipeX <= 20 && pipeX + 2 >= 20) {
+                gameOver = true;
+                console.log("Game Over");
+            }
+        }
+    }
+}
+
 function fall() {
     velocity += gravity;
     birdY += velocity;
@@ -45,6 +92,47 @@ function fall() {
     if (birdY >= 121) {
         birdY = 121;
         velocity = 0;
+    }
+}
+
+function spawnPipes() {
+    if (T % 100 === 0) {
+        for (let i = 0; i < pipes.length; i++) {
+            if (pipes[i].free) {
+                pipes[i].x = 128;
+                pipes[i].y = Math.floor(Math.random() * 8) * 8 + 48;
+                pipes[i].free = false;
+                //console.log("Spawned pipe at", pipes[i].y);
+                return;
+            }
+        }
+    }
+}
+
+function drawPipe(pipe) {
+    if (pipe.free) return;
+
+    const pipeY = pipe.y;
+    const pipeX = pipe.x;
+    for (let i = 0; i < 128; i+=8) {
+        if (i < pipeY && i > pipeY - gap) {
+            continue;
+        }
+        spr(16, pipeX, i, 2, 1);
+    }
+
+    spr(32, pipeX, pipeY - 7, 2, 1);
+    spr(32, pipeX, pipeY - gap + 8, 2, 1);
+}
+
+function movePipes() {
+    for (let i = 0; i < pipes.length; i++) {
+        pipes[i].x -= 1;
+        if (pipes[i].x < -16) {
+            pipes[i].free = true;
+            pipes[i].x = 128;
+            pipes[i].y = 0;
+        }
     }
 }
 
@@ -101,7 +189,7 @@ const sprites = {
         [11,11,11,3,3,5,],
         [11,11,11,3,3,5,],
     ],
-    33: [
+    32: [
         [5,5,5,5,5,5,5,5],
         [5,3,3,11,7,11,11,11],
         [5,3,3,11,7,11,11,11],
@@ -111,7 +199,7 @@ const sprites = {
         [5,5,5,5,5,5,5,5],
         [],
     ],
-    34: [
+    33: [
         [5,5,5,5,5,5,5,5],
         [11,11,3,3,3,3,3,5],
         [11,11,3,3,3,3,3,5],
