@@ -1,3 +1,4 @@
+const birdX = 20;
 let birdY = 20;
 let velocity = 0;
 let gravity = 0.1;
@@ -19,7 +20,6 @@ function _update() {
     fall();
     flap();
     movePipes();
-    checkCollision();
 }
 
 function _draw() {
@@ -32,11 +32,12 @@ function _draw() {
     }
 
     collisionArea();
+    checkCollision();
 }
 
 function animateBird() {
     const sp = Math.floor(T / 6) % playerAnimation.length;
-    spr(playerAnimation[sp], 20, birdY);
+    spr(playerAnimation[sp], birdX, birdY);
 }
 
 function flap() {
@@ -57,8 +58,8 @@ function collisionArea() {
         const pipeY = pipes[i].y;
         const pipeX = pipes[i].x;
 
-        rect(pipeX + 2, pipeY - 7, 12, 126, 10);
-        rect(pipeX + 2, 0, 12, pipeY - gap + 8 + 7, 10);
+        rect(pipeX + 2, 0, 12, pipeY - gap + 8 + 7, 10); // top pipe
+        rect(pipeX + 2, pipeY - 7, 12, 126, 11); // bottom pipe
 
         //if (birdY >= pipeY - 7 && birdY <= pipeY + gap) {
         //    if (pipeX <= 20 && pipeX + 2 >= 20) {
@@ -76,10 +77,12 @@ function checkCollision() {
         const pipeY = pipes[i].y;
         const pipeX = pipes[i].x;
 
-        if (birdY >= pipeY - 7 && birdY <= pipeY + gap) {
-            if (pipeX <= 20 && pipeX + 2 >= 20) {
+        if ((birdX + 8 >= pipeX + 2 && birdX + 8 <= pipeX + 14) || (birdX >= pipeX + 2 && birdX <= pipeX + 14)) {
+            if ((birdY + 8 >= pipeY - 7 && birdY <= 128) || (birdY <= pipeY - gap + 8 + 7 && birdY >= 0)) {
+                rectfill(birdX, birdY, 8, 8, 0);
                 gameOver = true;
-                console.log("Game Over");
+                console.log(Date.now(), "Game Over");
+                return;
             }
         }
     }
