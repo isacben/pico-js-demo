@@ -114,7 +114,7 @@ const buttons = [
 /** Array to keep track of the number of frames that have passed when a button remains pressed
  * @type {Array<Number>}
  * @memberof Engine */
-let pressedBtnCounter = [0, 0, 0, 0, 0];
+let pressedBtnCounter = [0, 0, 0, 0, 0, 0];
 
 /** Engine current state of the engine state machine
  * @type {String}
@@ -710,7 +710,6 @@ function gameLoop(timestamp) {
 	accumulator += delta;
 
   const fps = Math.round(1000 / delta);
-  print(`FPS: ${fps}`, 0, 0, 7);
 
   while (accumulator >= FRAMES_PER_SECOND) {
 
@@ -718,6 +717,7 @@ function gameLoop(timestamp) {
         case engineState.PLAYING:
           _update();
           _draw();
+          print(`FPS: ${fps}`, 0, 0, 7);
           break;
         case engineState.PAUSED:
           _draw();
