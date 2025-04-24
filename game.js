@@ -4,8 +4,7 @@ let velocity = 0;
 let gravity = 0.1;
 const gap = 56;
 let score = 0;
-let gameOver = false;
-let gameStarted = false;
+let state = "gameover";
 
 let T = 0;
 const playerAnimation = [0, 1, 2];
@@ -16,16 +15,13 @@ let pipes = [
     { x: 108, y: 0, free: true },
 ];
 
-let state = "cover";
-
-
 function _update() {
     T += 1;
 
     switch (state) {
         case "cover":
             break;
-        case "game":
+        case "play":
             fall();
             flap();
             movePipes();
@@ -39,15 +35,16 @@ function _draw() {
     switch (state) {
         case "cover":
             if (btnp(5)) {
-                state = "game";
+                state = "play";
             }
             drawCover();
             break;
-        case "game":
-            animateBird();
+        case "play":
             spawnPipes();
             for (let i = 0; i < pipes.length; i++) {
                 drawPipe(pipes[i]);
+
+                // increment score
                 if (!pipes[i].free) {
                     if (pipes[i].x + 16 === birdX) {
                         score += 1;
@@ -55,10 +52,22 @@ function _draw() {
                 }
             }
 
+            animateBird();
             drawScore();
             //collisionArea();
             checkCollision();
             break;
+        case "gameover":
+            for (let i = 0; i < pipes.length; i++) {
+                drawPipe(pipes[i]);
+            }
+            drawScore();
+            gameOver();
+            fall();
+            if (btnp(5)) {
+                restartGame();
+                state = "play";
+            }
     }
 }
 
@@ -102,9 +111,7 @@ function checkCollision() {
             if ((birdY + 8 >= pipeY - 7 && birdY <= 128) || (birdY <= pipeY - gap + 8 + 7 && birdY >= 0)) {
                 rectfill(birdX, birdY, 8, 8, 0);
 
-                restartGame();
-                gameOver = true;
-                console.log(Date.now(), "Game Over");
+                state = "gameover";
                 return;
             }
         }
@@ -162,12 +169,23 @@ function movePipes() {
 }
 
 function drawCover() {
-    print("Flappy Bird", 20, 20, 7);
-    print("Press X to start", 20, 40, 7);
+    print("Flappy Bird", 42, 40, 7);
+    print("Press X to start", 32, 70, 7);
+}
+
+function gameOver() {
+    print("Game Over", 49,  44, 0);
+    print("Game Over", 49,  45, 0);
+    print("Game Over", 48,  45, 0);
+    print("Game Over", 48,  44, 9);
+
+    if (Math.sin(0.1*T) > 0) 
+        print("Press X to try again!", 24, 60, 7);
+
+    spr(0, birdX, birdY);
 }
 
 function restartGame() {
-    gameOver = false;
     gameStarted = false;
     birdY = 20;
     velocity = 0;
