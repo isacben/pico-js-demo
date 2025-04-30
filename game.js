@@ -24,7 +24,11 @@ function _update() {
         case "play":
             fall();
             flap();
+            spawnPipes();
             movePipes();
+            break;
+        case "gameover":
+            fall();
             break;
     }
 }
@@ -40,16 +44,9 @@ function _draw() {
             drawCover();
             break;
         case "play":
-            spawnPipes();
             for (let i = 0; i < pipes.length; i++) {
                 drawPipe(pipes[i]);
 
-                // increment score
-                if (!pipes[i].free) {
-                    if (pipes[i].x + 16 === birdX) {
-                        score += 1;
-                    }
-                }
             }
 
             animateBird();
@@ -63,7 +60,6 @@ function _draw() {
             }
             drawScore();
             gameOver();
-            fall();
             if (btnp(5)) {
                 restartGame();
                 state = "play";
@@ -109,8 +105,6 @@ function checkCollision() {
 
         if ((birdX + 8 >= pipeX + 2 && birdX + 8 <= pipeX + 14) || (birdX >= pipeX + 2 && birdX <= pipeX + 14)) {
             if ((birdY + 8 >= pipeY - 7 && birdY <= 128) || (birdY <= pipeY - gap + 8 + 7 && birdY >= 0)) {
-                rectfill(birdX, birdY, 8, 8, 0);
-
                 state = "gameover";
                 return;
             }
@@ -159,11 +153,18 @@ function drawPipe(pipe) {
 
 function movePipes() {
     for (let i = 0; i < pipes.length; i++) {
-        pipes[i].x -= 1;
-        if (pipes[i].x < -16) {
-            pipes[i].free = true;
-            pipes[i].x = 128;
-            pipes[i].y = 0;
+        if (!pipes[i].free) {
+            pipes[i].x -= 1;
+            if (pipes[i].x < -16) {
+                pipes[i].free = true;
+                pipes[i].x = 128;
+                pipes[i].y = 0;
+            }
+
+            // increment score
+            if (pipes[i].x + 16 === birdX) {
+                score += 1;
+            }
         }
     }
 }
