@@ -102,6 +102,12 @@ const engineState = {
   RESET: 'reset'
 };
 
+/** Pause state
+ * @type {Boolean}
+ * @default false
+ * @memberof Engine */
+let paused = false;
+
 /** Array of the available buttons in the engine
  * - 0: left
  * - 1: right
@@ -615,7 +621,7 @@ rootElement.appendChild(canvas);
 /** Main canvas context
  * @type {CanvasRenderingContext2D}
  * @memberof Engine */
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", { alpha: false });
 
 /** Device pixel ratio
  * @type {Number}
@@ -713,45 +719,51 @@ function engineInit(_update, _draw, sprites) {
   function gameLoop(frameTimeMS=0) {
     const frameTimeDeltaMS = frameTimeMS - frameTimeLastMS;
     frameTimeLastMS = frameTimeMS;
-    frameTimeBufferMS += frameTimeDeltaMS;
+    
+    // show debug panel here
+    // TODO
     averageFPS = lerp(.05, averageFPS, 1e3/(frameTimeDeltaMS||1));
 
-    // apply time delta smoothing, improves smoothness of framerate in some browsers
-    let deltaSmooth = 0;
-    if (frameTimeBufferMS < 0 && frameTimeBufferMS > -9)
-    {
-        // force at least one update each frame since it is waiting for refresh
-        deltaSmooth = frameTimeBufferMS;
-        frameTimeBufferMS = 0;
-    }
+    //frameTimeBufferMS += frameTimeDeltaMS;
+    frameTimeBufferMS += paused ? 0 : frameTimeDeltaMS;
 
-    for (;frameTimeBufferMS >= 0; frameTimeBufferMS -= 1e3 / frameRate){
-      switch (engineCurrentState) {
-        case engineState.PLAYING:
-          _update();
-          break;
-        case engineState.PAUSED:
-          //_draw();
-          //drawEngineMenu();
-          break;
+    resizeCanvas();
+
+    if (paused) {
+      // TODO: draw menu in overlay canvas
+    }
+    else {
+      // apply time delta smoothing, improves smoothness of framerate in some browsers
+      let deltaSmooth = 0;
+      if (frameTimeBufferMS < 0 && frameTimeBufferMS > -9)
+      {
+          // force at least one update each frame since it is waiting for refresh
+          deltaSmooth = frameTimeBufferMS;
+          frameTimeBufferMS = 0;
       }
-    }
 
-    // add the time smoothing back in
-    frameTimeBufferMS += deltaSmooth;
+      // update game state
+      // update multiple frames if necessary in case of slow framerate
+      for (;frameTimeBufferMS >= 0; frameTimeBufferMS -= 1e3 / frameRate) {
+        _update();
+      }
+
+      // add the time smoothing back in
+      frameTimeBufferMS += deltaSmooth;
+    }
 
     _draw();
-    if (engineCurrentState === engineState.PAUSED) {
-      drawEngineMenu();
-    }
     print(`FPS: ${Math.floor(averageFPS)}`, 0, 0, 7);
-    window.requestAnimationFrame(gameLoop);
+    // TODO: remove when there is an overlay canvas
+    if (paused) drawEngineMenu();
+
+    requestAnimationFrame(gameLoop);
   }
   
   drawSprites(sprites);
+
+  requestAnimationFrame(gameLoop);
   window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-  window.requestAnimationFrame(gameLoop);
 }
 
 
@@ -763,7 +775,8 @@ function engineInit(_update, _draw, sprites) {
  *  @param {Number} [color] - Color to cover the screen with (defualt=0)
  *  @memberof Engine */
 function cls(color=0) {
-    rectfill(0, 0, canvas.width, canvas.height, color);
+  rectfill(0, 0, canvas.width, canvas.height, color);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 /** Draw a rectangle
@@ -1056,6 +1069,7 @@ function handleMenu() {
   switch (currentMenuState.state) {
     case menuState.DISABLED:
       engineCurrentState = engineState.PAUSED;
+      paused = true;
       currentMenuState.state = menuState.MAIN;
       menuItems = ['continue', 'options', 'reset game'];
       break;
@@ -1064,6 +1078,7 @@ function handleMenu() {
         case 0: // select 'continue'
           currentMenuState.state = menuState.DISABLED;
           engineCurrentState = engineState.PLAYING;
+          paused = false;
           break;
         case 1: // select 'options'
           currentMenuState.state = menuState.OPTIONS
@@ -1174,7 +1189,7 @@ function btnp(b) {
     if (pressedBtnCounter[b] === 1) return true;
     
     // If the button is still pressed, but the counter reached 30 fps, reset the counter
-    if (pressedBtnCounter[b] >= 30) pressedBtnCounter[b] = 0;
+    if (pressedBtnCounter[b] >= 15) pressedBtnCounter[b] = 0;
   }
 
   return false;
@@ -1237,4 +1252,6 @@ document.addEventListener('keyup', (event) => {
       pressedBtnCounter[5] = 0;
       break;
   }
+
+  preventDefaultInput && event.preventDefault();
 });
