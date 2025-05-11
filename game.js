@@ -38,7 +38,7 @@ function _draw() {
 
     switch (state) {
         case "cover":
-            if (btnp(5)) {
+            if (btn(5)) {
                 state = "play";
             }
             drawCover();
@@ -60,7 +60,7 @@ function _draw() {
             }
             drawScore();
             gameOver();
-            if (btnp(5)) {
+            if (btn(5)) {
                 restartGame();
                 state = "play";
             }
