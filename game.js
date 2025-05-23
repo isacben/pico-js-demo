@@ -22,10 +22,10 @@ function _update() {
         case "cover":
             break;
         case "play":
-            fall();
-            flap();
             spawnPipes();
             movePipes();
+            flap();
+            fall();
             break;
         case "gameover":
             fall();
@@ -46,7 +46,6 @@ function _draw() {
         case "play":
             for (let i = 0; i < pipes.length; i++) {
                 drawPipe(pipes[i]);
-
             }
 
             animateBird();
@@ -124,7 +123,8 @@ function fall() {
 
 function spawnPipes() {
     if (T % 100 === 0) {
-        for (let i = 0; i < pipes.length; i++) {
+        const l = pipes.length;
+        for (let i = 0; i < l; i++) {
             if (pipes[i].free) {
                 pipes[i].x = 128;
                 pipes[i].y = Math.floor(Math.random() * 8) * 8 + 56;
@@ -152,7 +152,8 @@ function drawPipe(pipe) {
 }
 
 function movePipes() {
-    for (let i = 0; i < pipes.length; i++) {
+    const l = pipes.length;
+    for (let i = 0; i < l; i++) {
         if (!pipes[i].free) {
             pipes[i].x -= 1;
             if (pipes[i].x < -16) {
