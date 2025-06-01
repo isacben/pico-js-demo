@@ -41,7 +41,7 @@ function _draw() {
             if (btn(5)) {
                 state = "play";
             }
-            //drawCover();
+            drawCover();
             break;
         case "play":
             for (let i = 0; i < pipes.length; i++) {
@@ -173,6 +173,7 @@ function movePipes() {
 function drawCover() {
     print("Flappy Bird", 42, 40, 7);
     print("Press X to start", 32, 70, 7);
+    spr(48, 20, 20, 3, 1);
 }
 
 function gameOver() {
