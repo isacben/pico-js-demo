@@ -41,7 +41,7 @@ function _draw() {
             if (btn(5)) {
                 state = "play";
             }
-            drawCover();
+            //drawCover();
             break;
         case "play":
             for (let i = 0; i < pipes.length; i++) {
@@ -156,7 +156,7 @@ function movePipes() {
     for (let i = 0; i < l; i++) {
         if (!pipes[i].free) {
             pipes[i].x -= 1;
-            if (pipes[i].x < -16) {
+            if (pipes[i].x <= -16) {
                 pipes[i].free = true;
                 pipes[i].x = 128;
                 pipes[i].y = 0;
